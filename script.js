@@ -20,11 +20,21 @@ boardElement.addEventListener('click', (event) => {
 
     if (!index || !gameActive || board[index]) return;
 
-    board[index] = currentPlayer;
-    event.target.textContent = currentPlayer;
+    makeMove(index, currentPlayer);
 
-    if (checkWin()) {
-        statusElement.textContent = `Player ${currentPlayer} wins!`;
+    if (gameActive) {
+        currentPlayer = 'O';
+        statusElement.textContent = `Player ${currentPlayer}'s turn`;
+        setTimeout(computerMove, 500);
+    }
+});
+
+function makeMove(index, player) {
+    board[index] = player;
+    document.querySelector(`[data-index="${index}"]`).textContent = player;
+
+    if (checkWin(player)) {
+        statusElement.textContent = `Player ${player} wins!`;
         gameActive = false;
     } else if (board.every(cell => cell)) {
         statusElement.textContent = 'Draw!';
@@ -33,12 +43,21 @@ boardElement.addEventListener('click', (event) => {
         currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
         statusElement.textContent = `Player ${currentPlayer}'s turn`;
     }
-});
+}
 
-function checkWin() {
+function checkWin(player) {
     return winningCombinations.some(combination => {
         return combination.every(index => {
-            return board[index] === currentPlayer;
+            return board[index] === player;
         });
     });
+}
+
+function computerMove() {
+    let availableCells = board.map((cell, index) => cell === null ? index : null).filter(index => index !== null);
+    let randomIndex = availableCells[Math.floor(Math.random() * availableCells.length)];
+
+    if (randomIndex !== undefined) {
+        makeMove(randomIndex, 'O');
+    }
 }
